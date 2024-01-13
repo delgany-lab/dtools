@@ -83,7 +83,7 @@ USER $USER
 RUN sudo usermod -aG uucp $USER
 ENV IDF_PYTHON_CHECK_CONSTRAINTS=no
 ENV IDF_CCACHE_ENABLE=1
-COPY entrypoint.sh /opt/esp/entrypoint.sh
+COPY esp32-entrypoint.sh /opt/esp/entrypoint.sh
 ENTRYPOINT [ "/opt/esp/entrypoint.sh" ]
 CMD [ "/bin/bash" ]
 
