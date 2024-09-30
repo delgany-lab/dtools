@@ -8,7 +8,7 @@ esp32:
 		--target esp32 -t esp32:latest .
 
 run-esp32:
-	docker run --rm -it -v ${HOME}:${HOME} -v ${PWD}:/project -w /project --device=/dev/ttyUSB0 esp32:latest /bin/bash -c "source ~/.bashrc && tmux"
+	docker run --rm -it -v ${HOME}:${HOME} -v ${PWD}:/project -w /project --name esp32 --device=/dev/ttyUSB0 esp32:latest /bin/bash -c "source ~/.bashrc && tmux"
 
 lab:
 	DOCKER_BUILDKIT=1 docker build \

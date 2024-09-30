@@ -16,7 +16,7 @@ build = subparsers.add_parser("build", help="Builds a new dev image")
 build.add_argument(
     "--type",
     type=str,
-    choices=["esp32", "lab"],
+    choices=["esp32", "lab", "gcloud", "flutter", "cpp"],
     help="Type of a container",
     required=True,
 )
@@ -39,10 +39,10 @@ if args.command == "build":
     if p.returncode == 0:
         sys.exit(f'Image "{args.name}" already exists')
     p = subprocess.run(
-        f"docker build --target {args.type} -t {args.type} "
+        f"docker buildx build --target {args.type} -t {args.name} "
         f"--build-arg USER=$(whoami) "
         f"--build-arg UID=$(id -u) --build-arg GID=$(id -g) "
-        f"-f docker/Dockerfile .",
+        f"-f docker/Dockerfile ./docker",
         shell=True,
     )
 elif args.command == "shell":
@@ -53,11 +53,12 @@ elif args.command == "shell":
     if p.returncode != 0:
         cmd = (
             f"docker run -id -h {args.name} -P "
+            "--privileged --device=/dev/bus -v /dev:/dev "
             f"-v $HOME:$HOME "
         )
         if args.docker_run_args:
             cmd += f"{args.docker_run_args} "
-        cmd += f"--name {args.name} {args.name}"
+        cmd += f"--name {args.name} {args.name} "
         p = subprocess.run(cmd, shell=True, capture_output=True)
         if p.returncode != 0:
             sys.exit(f"{p.stderr}")
