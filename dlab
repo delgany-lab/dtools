@@ -28,6 +28,8 @@ shell.add_argument("-c", help="Command to run")
 shell.add_argument(
     "--docker-run-args", type=str, help="Native docker run commands", required=False
 )
+delete = subparsers.add_parser("delete", help="Stop and delete a container")
+delete.add_argument("name", help="Name of the container")
 
 args = parser.parse_args()
 
@@ -39,7 +41,7 @@ if args.command == "build":
     if p.returncode == 0:
         sys.exit(f'Image "{args.name}" already exists')
     p = subprocess.run(
-        f"docker buildx build --target {args.type} -t {args.name} "
+        f"docker buildx build --load --target {args.type} -t {args.name} "
         f"--build-arg USER=$(whoami) "
         f"--build-arg UID=$(id -u) --build-arg GID=$(id -g) "
         f"-f docker/Dockerfile ./docker",
@@ -68,3 +70,8 @@ elif args.command == "shell":
     if args.c:
         cmd += f" -c '{args.c}'"
     subprocess.run(cmd, shell=True)
+elif args.command == "delete":
+    p = subprocess.run(
+        f"docker container stop {args.name}; docker rm {args.name}",
+        shell=True)
+

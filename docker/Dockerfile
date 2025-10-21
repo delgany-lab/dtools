@@ -1,4 +1,4 @@
-FROM archlinux:latest as base-dev
+FROM archlinux:latest AS base-dev
 
 ARG USER=pawel
 ARG UID=1000
@@ -35,7 +35,7 @@ USER $USER
 
 ######### ESP ##############
 
-FROM base-dev as esp32
+FROM base-dev AS esp32
 ARG USER=pawel
 
 RUN sudo pacman -Suy --needed --noconfirm && sudo pacman --noconfirm -S \
@@ -79,8 +79,8 @@ RUN : \
   && :
 
 USER $USER
-# Access to /dev/ttyXXX - ESP board device
-RUN sudo usermod -aG uucp $USER
+# Access to /dev/ttyXXX - ESP board device (uucp for /dev/ttyUSB*, storage for /dev/ttyACM*)
+RUN sudo usermod -aG uucp,storage $USER
 ENV IDF_PYTHON_CHECK_CONSTRAINTS=no
 ENV IDF_CCACHE_ENABLE=1
 COPY esp32-entrypoint.sh /opt/esp/entrypoint.sh
@@ -89,7 +89,7 @@ CMD [ "/bin/bash" ]
 
 ######### ESPHome ##############
 
-FROM esp32 as esphome
+FROM esp32 AS esphome
 ARG USER=pawel
 
 ENV ESPHOME_PATH=/opt/esp/esphome
@@ -101,7 +101,7 @@ RUN : \
 
 ######### Lab ##############
 
-FROM base-dev as lab
+FROM base-dev AS lab
 
 RUN sudo pacman -Suy --needed --noconfirm && sudo pacman --noconfirm -S \
     go \
@@ -110,7 +110,7 @@ RUN sudo pacman -Suy --needed --noconfirm && sudo pacman --noconfirm -S \
 
 ######### Google Cloud CLI + Terraform ##############
 
-FROM base-dev as gcloud
+FROM base-dev AS gcloud
 ARG CLOUD_SDK_VERSION=460.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ARG GCLOUD_CLI_FILENAME=google-cloud-cli-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz
@@ -141,17 +141,17 @@ RUN cd /tmp && \
 ######### FLUTTER ##############
 # Inspired by https://github.com/matsp/docker-flutter
 
-FROM base-dev as flutter
+FROM base-dev AS flutter
 ARG USER=pawel
 ENV WORKSPACE="/workspace"
 ENV JAVA_VERSION="17"
-ENV ANDROID_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip"
-ENV ANDROID_VERSION="34"
-ENV ANDROID_BUILD_TOOLS_VERSION="34.0.0"
+ENV ANDROID_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip"
+ENV ANDROID_VERSION="36"
+ENV ANDROID_BUILD_TOOLS_VERSION="35.0.0"
 ENV ANDROID_ARCHITECTURE="x86_64"
 ENV ANDROID_SDK_ROOT="/opt/android-sdk"
 ENV ANDROID_PREFS_ROOT="$WORKSPACE"
-ENV FLUTTER_VERSION="3.19.1"
+ENV FLUTTER_VERSION="3.35.6"
 ENV FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_$FLUTTER_VERSION-stable.tar.xz"
 ENV FLUTTER_HOME="/opt/flutter"
 
@@ -197,7 +197,7 @@ RUN sudo gem install --no-user-install -NV \
 
 ######### cpp ##############
 
-FROM base-dev as cpp
+FROM base-dev AS cpp
 
 RUN sudo pacman -Suy --needed --noconfirm && sudo pacman --noconfirm -S \
     gcc \
